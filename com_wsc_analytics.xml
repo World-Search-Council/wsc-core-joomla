@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade">
+    <name>COM_WSC_ANALYTICS</name>
+    <author>World Search Council</author>
+    <creationDate>August 2026</creationDate>
+    <copyright>Copyright (C) 2026 World Search Council. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later</license>
+    <authorEmail>info@worldseocouncil.com</authorEmail>
+    <authorUrl>https://worldseocouncil.com</authorUrl>
+    <version>2.2.0</version>
+    <description>COM_WSC_ANALYTICS_XML_DESCRIPTION</description>
+    <namespace path="src">Joomla\Component\WscAnalytics</namespace>
+
+    <!-- Installation / Update Scripts -->
+    <scriptfile>script.php</scriptfile>
+
+    <files folder="site">
+        <folder>src</folder>
+        <folder>tmpl</folder>
+    </files>
+
+    <media destination="com_wsc_analytics" folder="media">
+        <filename>joomla.asset.json</filename>
+        <folder>js</folder>
+        <folder>css</folder>
+    </media>
+
+    <administration>
+        <menu link="index.php?option=com_wsc_analytics" view="dashboard" img="class:chart-pie">COM_WSC_ANALYTICS_MENU</menu>
+        <files folder="admin">
+            <filename>access.xml</filename>
+            <filename>config.xml</filename>
+            <folder>services</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+        </files>
+    </administration>
+
+    <!-- Bundled System Plugin -->
+    <plugins>
+        <plugin folder="plugins/system/wsc_analytics" plugin="wsc_analytics" group="system" />
+    </plugins>
+</extension>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <fieldset name="general" label="General Tracking Settings">
+        <field
+            name="tracking_active"
+            type="radio"
+            label="Enable WSC Tracking"
+            description="Activate client-side tracker and edge AI crawler sensor"
+            layout="joomla.form.field.radio.switcher"
+            default="1">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="tracking_mode"
+            type="list"
+            label="Tracking Mode"
+            description="Choose between cookieless privacy-first or consent-required mode"
+            default="cookieless">
+            <option value="cookieless">Cookieless Privacy-First (100% GDPR/ePrivacy compliant without cookie banner)</option>
+            <option value="consent">Consent-Required (Only tracks when visitor grants consent)</option>
+        </field>
+
+        <field
+            name="exclude_admins"
+            type="radio"
+            label="Exclude Administrators"
+            description="Do not record visits from logged-in administrators"
+            layout="joomla.form.field.radio.switcher"
+            default="1">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+    </fieldset>
+
+    <fieldset name="gateway" label="WSC Gateway &amp; Hybrid Encryption">
+        <field
+            name="hybrid_enabled"
+            type="radio"
+            label="Enable Hybrid Sync"
+            description="Synchronize encrypted micro-batches to WSC Gateway (ClickHouse analytics backend)"
+            layout="joomla.form.field.radio.switcher"
+            default="1">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="gateway_url"
+            type="url"
+            label="Gateway API URL"
+            description="Base URL of WSC Gateway ingest endpoint"
+            default="https://api.worldseocouncil.com"
+            required="true"
+        />
+
+        <field
+            name="project_id"
+            type="text"
+            label="Project ID"
+            description="Unique identifier assigned to this Joomla site"
+            readonly="true"
+        />
+
+        <field
+            name="local_key"
+            type="text"
+            label="Local 256-Bit AES Key"
+            description="Local secret key used for encrypting micro-batches"
+            readonly="true"
+        />
+    </fieldset>
+
+    <fieldset name="bot_shield" label="AI Bot Shield Sensor">
+        <field
+            name="bot_tracking_level"
+            type="list"
+            label="Bot Tracking Scope"
+            description="Select which crawlers and bots to log at the edge layer"
+            default="search_ai">
+            <option value="off">Disabled</option>
+            <option value="ai_only">AI / LLM Bots only (GPTBot, Claude, Perplexity)</option>
+            <option value="search_ai">Search Engines + AI Bots (Recommended)</option>
+            <option value="all">All known crawlers &amp; SEO tools</option>
+        </field>
+    </fieldset>
+
+    <fieldset name="interactions" label="Automated User Interactions">
+        <field
+            name="auto_downloads"
+            type="radio"
+            label="Auto-track file downloads (PDF, ZIP, etc.)"
+            layout="joomla.form.field.radio.switcher"
+            default="0">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="auto_media"
+            type="radio"
+            label="Auto-track HTML5 video and audio playback"
+            layout="joomla.form.field.radio.switcher"
+            default="0">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="auto_outbound"
+            type="radio"
+            label="Auto-track outbound link clicks"
+            layout="joomla.form.field.radio.switcher"
+            default="0">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="auto_forms"
+            type="radio"
+            label="Auto-track form submissions"
+            layout="joomla.form.field.radio.switcher"
+            default="0">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="auto_scroll"
+            type="radio"
+            label="Auto-track scroll depth (25%, 50%, 75%, 100%)"
+            layout="joomla.form.field.radio.switcher"
+            default="0">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="auto_time_on_page"
+            type="radio"
+            label="Auto-track active engaged time on page"
+            layout="joomla.form.field.radio.switcher"
+            default="0">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+    </fieldset>
+
+    <fieldset name="maintenance" label="Data Retention">
+        <field
+            name="retention_days"
+            type="number"
+            label="Local Queue Retention (Days)"
+            description="Number of days to keep synced records in local SQLite queue before pruning"
+            default="30"
+            min="1"
+            max="365"
+        />
+    </fieldset>
+</config>

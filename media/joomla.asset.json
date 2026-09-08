@@ -1,0 +1,33 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/assets.json",
+  "name": "com_wsc_analytics",
+  "version": "1.5.0",
+  "description": "WSC Analytics & Bot Shield asset definitions",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "com_wsc_analytics.tracker",
+      "type": "script",
+      "uri": "media/com_wsc_analytics/js/wsc-tracker.js",
+      "attributes": {
+        "defer": true
+      }
+    },
+    {
+      "name": "com_wsc_analytics.dashboard",
+      "type": "script",
+      "uri": "media/com_wsc_analytics/js/wsc-dashboard.js",
+      "dependencies": [
+        "core"
+      ],
+      "attributes": {
+        "defer": true
+      }
+    },
+    {
+      "name": "com_wsc_analytics.dashboard",
+      "type": "style",
+      "uri": "media/com_wsc_analytics/css/wsc-dashboard.css"
+    }
+  ]
+}
