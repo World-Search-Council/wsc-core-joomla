@@ -65,7 +65,7 @@ class ApiController extends BaseController {
                 'Content-Type' => 'application/json',
                 'X-WSC-Sig'    => $signature,
             ];
-            $response = $http->post('https://gateway.worldseocouncil.com/v1/ai-coverage/query', $payload, $headers, 10);
+            $response = $http->post('https://api.worldsearchcouncil.org/v1/ai-coverage/query', $payload, $headers, 10);
             $decoded = json_decode((string) $response->body, true);
 
             echo new JsonResponse($decoded ?: ['status' => 'error']);

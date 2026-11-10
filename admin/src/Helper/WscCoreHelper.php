@@ -16,7 +16,7 @@ use Exception;
  */
 class WscCoreHelper {
 
-    public const GATEWAY_DEFAULT = 'https://api.worldseocouncil.com';
+    public const GATEWAY_DEFAULT = 'https://api.worldsearchcouncil.org';
 
     private static ?PDO $queuePdo = null;
     private static ?PDO $reportsPdo = null;

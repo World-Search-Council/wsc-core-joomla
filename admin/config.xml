@@ -51,7 +51,7 @@
             type="url"
             label="Gateway API URL"
             description="Base URL of WSC Gateway ingest endpoint"
-            default="https://api.worldseocouncil.com"
+            default="https://api.worldsearchcouncil.org"
             required="true"
         />
 
