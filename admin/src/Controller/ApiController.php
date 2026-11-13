@@ -6,10 +6,11 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Response\JsonResponse;
+use Joomla\CMS\Uri\Uri;
 use Joomla\Component\WscAnalytics\Administrator\Helper\WscCoreHelper;
 
 /**
- * Controller for Admin AJAX sync operations.
+ * Controller for Admin AJAX sync, diagnostics, AI Coverage, Benchmarks, WSC Membership & IndexNow (v2.2.3).
  */
 class ApiController extends BaseController {
 
@@ -22,57 +23,31 @@ class ApiController extends BaseController {
         $synced = WscCoreHelper::processBatchExport();
 
         echo new JsonResponse([
-            'ok' => true,
+            'ok'            => true,
             'synced_events' => $synced,
-            'last_sync' => date('Y-m-d H:i:s'),
+            'last_sync'     => gmdate('Y-m-d H:i:s') . ' UTC',
         ]);
 
         $this->app->close();
     }
 
     /**
-     * AJAX action to proxy AI Coverage lookup to WSC Gateway.
+     * AJAX action to query AI Coverage URL Inspector (Gateway + SQLite fallback).
      */
     public function aiCoverage(): void {
-        $this->checkToken('post');
+        $this->checkToken('get');
 
         $input = $this->input->json;
         $queryUrl = trim((string) $input->get('query', '', 'string'));
         $timeframe = trim((string) $input->get('timeframe', '30d', 'string'));
 
-        if (empty($queryUrl)) {
-            echo new JsonResponse(['ok' => false, 'error' => 'query_required'], 400);
+        if ($queryUrl === '') {
+            echo new JsonResponse(['ok' => false, 'error' => 'query_required'], null, true);
             $this->app->close();
         }
 
-        $creds = WscCoreHelper::getProjectCredentials();
-        if (empty($creds['project_id']) || empty($creds['api_secret'])) {
-            echo new JsonResponse(['ok' => false, 'error' => 'not_configured'], 400);
-            $this->app->close();
-        }
-
-        $payload = json_encode([
-            'project_id' => $creds['project_id'],
-            'query'      => $queryUrl,
-            'timeframe'  => in_array($timeframe, ['7d', '30d'], true) ? $timeframe : '30d',
-        ]);
-
-        $signature = hash_hmac('sha256', $payload, $creds['api_secret']);
-
-        try {
-            $http = \Joomla\CMS\Http\HttpFactory::getHttp();
-            $headers = [
-                'Content-Type' => 'application/json',
-                'X-WSC-Sig'    => $signature,
-            ];
-            $response = $http->post('https://api.worldsearchcouncil.org/v1/ai-coverage/query', $payload, $headers, 10);
-            $decoded = json_decode((string) $response->body, true);
-
-            echo new JsonResponse($decoded ?: ['status' => 'error']);
-        } catch (\Throwable $e) {
-            echo new JsonResponse(['ok' => false, 'error' => $e->getMessage()], 502);
-        }
-
+        $result = WscCoreHelper::queryAiCoverage($queryUrl, $timeframe);
+        echo new JsonResponse($result, null, empty($result['ok']));
         $this->app->close();
     }
 
@@ -90,13 +65,14 @@ class ApiController extends BaseController {
      * AJAX action to trigger SpeedSentinel 2.0 Lab Audit.
      */
     public function pagespeedAudit(): void {
-        $this->checkToken('post');
+        $this->checkToken('get');
         $input = $this->input->json;
-        $url = trim((string) $input->get('url', \Joomla\CMS\Uri\Uri::root(), 'string'));
-        $strategy = in_array($input->get('strategy', 'mobile', 'string'), ['mobile', 'desktop'], true) ? $input->get('strategy', 'mobile', 'string') : 'mobile';
+        $url = trim((string) $input->get('url', Uri::root(), 'string'));
+        $rawStrategy = (string) $input->get('strategy', 'mobile', 'string');
+        $strategy = in_array($rawStrategy, ['mobile', 'desktop'], true) ? $rawStrategy : 'mobile';
 
         $result = WscCoreHelper::triggerSpeedSentinelAudit($url, $strategy);
-        echo new JsonResponse($result, null, !($result['ok'] ?? false));
+        echo new JsonResponse($result, null, empty($result['ok']));
         $this->app->close();
     }
 
@@ -104,12 +80,81 @@ class ApiController extends BaseController {
      * AJAX action to trigger Sentinel Domain Health Scan.
      */
     public function sentinelScan(): void {
-        $this->checkToken('post');
+        $this->checkToken('get');
         $input = $this->input->json;
-        $domain = trim((string) $input->get('domain', \Joomla\CMS\Uri\Uri::getInstance()->getHost(), 'string'));
+        $domain = trim((string) $input->get('domain', Uri::getInstance(Uri::root())->getHost(), 'string'));
 
         $result = WscCoreHelper::triggerSentinelScan($domain);
-        echo new JsonResponse($result, null, !($result['ok'] ?? false));
+        echo new JsonResponse($result, null, empty($result['ok']));
+        $this->app->close();
+    }
+
+    /**
+     * AJAX action to refresh dynamic Industry Benchmarks.
+     */
+    public function benchmarks(): void {
+        $this->checkToken('get');
+        $result = WscCoreHelper::getIndustryBenchmarks(true);
+        echo new JsonResponse($result);
+        $this->app->close();
+    }
+
+    /**
+     * AJAX action to auto-classify Industry Vertical and refresh Benchmarks.
+     */
+    public function classifyVertical(): void {
+        $this->checkToken('get');
+        $result = WscCoreHelper::classifyVertical();
+        echo new JsonResponse($result, null, empty($result['ok']));
+        $this->app->close();
+    }
+
+    /**
+     * AJAX action to verify WSC Member / Agency credential against www.worldsearchcouncil.org.
+     */
+    public function licenseVerify(): void {
+        $this->checkToken('get');
+        $input = $this->input->json;
+        $key = trim((string) $input->get('license_key', '', 'string'));
+        $coBrand = null;
+
+        $cbName = trim((string) $input->get('agency_name', '', 'string'));
+        $cbUrl  = trim((string) $input->get('agency_url', '', 'string'));
+        $cbMail = trim((string) $input->get('agency_email', '', 'string'));
+        $cbLogo = trim((string) $input->get('agency_logo', '', 'string'));
+        if ($cbName !== '' || $cbUrl !== '' || $cbMail !== '' || $cbLogo !== '') {
+            $coBrand = [
+                'name'  => $cbName,
+                'url'   => $cbUrl,
+                'email' => $cbMail,
+                'logo'  => $cbLogo,
+            ];
+        }
+
+        $result = WscCoreHelper::verifyLicense($key, $coBrand);
+        echo new JsonResponse($result, null, empty($result['ok']));
+        $this->app->close();
+    }
+
+    /**
+     * AJAX action to disconnect active WSC Member / Agency credential.
+     */
+    public function licenseDisconnect(): void {
+        $this->checkToken('get');
+        $result = WscCoreHelper::disconnectLicense();
+        echo new JsonResponse($result);
+        $this->app->close();
+    }
+
+    /**
+     * AJAX action to push a URL manually to IndexNow.
+     */
+    public function indexNowSubmit(): void {
+        $this->checkToken('get');
+        $input = $this->input->json;
+        $url = trim((string) $input->get('url', Uri::root(), 'string'));
+        $result = WscCoreHelper::submitIndexNow([$url], 'manual');
+        echo new JsonResponse($result, null, empty($result['ok']));
         $this->app->close();
     }
 }

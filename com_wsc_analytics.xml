@@ -2,12 +2,12 @@
 <extension type="component" method="upgrade">
     <name>COM_WSC_ANALYTICS</name>
     <author>World Search Council</author>
-    <creationDate>August 2026</creationDate>
+    <creationDate>November 2026</creationDate>
     <copyright>Copyright (C) 2026 World Search Council. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later</license>
     <authorEmail>info@worldsearchcouncil.org</authorEmail>
-    <authorUrl>https://worldsearchcouncil.org</authorUrl>
-    <version>2.2.0</version>
+    <authorUrl>https://www.worldsearchcouncil.org</authorUrl>
+    <version>2.2.3</version>
     <description>COM_WSC_ANALYTICS_XML_DESCRIPTION</description>
     <namespace path="src">Joomla\Component\WscAnalytics</namespace>
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
-    <fieldset name="general" label="General Tracking Settings">
+    <fieldset name="general" label="General Tracking &amp; Privacy Settings">
         <field
             name="tracking_active"
             type="radio"
@@ -23,6 +23,16 @@
         </field>
 
         <field
+            name="ip_handling"
+            type="list"
+            label="IP Address Privacy Mode (Zero-PII)"
+            description="Raw client IP addresses are never stored. Choose rotating daily salted hash or full discard."
+            default="hashed">
+            <option value="hashed">Rotating Salted Hash — SHA256(IP + UA + DailySalt)</option>
+            <option value="discard">Discard Completely (Zero Session Linking)</option>
+        </field>
+
+        <field
             name="exclude_admins"
             type="radio"
             label="Exclude Administrators"
@@ -34,14 +44,14 @@
         </field>
     </fieldset>
 
-    <fieldset name="gateway" label="WSC Gateway &amp; Hybrid Encryption">
+    <fieldset name="gateway" label="WSC Gateway &amp; Hybrid Encryption (Opt-In)">
         <field
             name="hybrid_enabled"
             type="radio"
-            label="Enable Hybrid Sync"
-            description="Synchronize encrypted micro-batches to WSC Gateway (ClickHouse analytics backend)"
+            label="Enable Hybrid Cloud Sync (Opt-In)"
+            description="Opt-in to synchronize AES-256-CBC encrypted micro-batches with the WSC Gateway (api.worldsearchcouncil.org)"
             layout="joomla.form.field.radio.switcher"
-            default="1">
+            default="0">
             <option value="0">JNO</option>
             <option value="1">JYES</option>
         </field>
@@ -50,7 +60,7 @@
             name="gateway_url"
             type="url"
             label="Gateway API URL"
-            description="Base URL of WSC Gateway ingest endpoint"
+            description="Base URL of WSC Gateway API"
             default="https://api.worldsearchcouncil.org"
             required="true"
         />
@@ -59,7 +69,15 @@
             name="project_id"
             type="text"
             label="Project ID"
-            description="Unique identifier assigned to this Joomla site"
+            description="Unique identifier assigned by the WSC Gateway upon opt-in registration"
+            readonly="true"
+        />
+
+        <field
+            name="api_secret"
+            type="text"
+            label="Gateway HMAC Secret"
+            description="HMAC-SHA256 signing secret issued by WSC Gateway (/v1/register)"
             readonly="true"
         />
 
@@ -67,7 +85,110 @@
             name="local_key"
             type="text"
             label="Local 256-Bit AES Key"
-            description="Local secret key used for encrypting micro-batches"
+            description="Local 64-char hex secret key used for AES-256-CBC micro-batch encryption"
+            readonly="true"
+        />
+    </fieldset>
+
+    <fieldset name="membership" label="WSC Membership &amp; Agency Co-Branding">
+        <field
+            name="license_key"
+            type="text"
+            label="WSC Member / Agency License Key"
+            description="Verify your live credential against www.worldsearchcouncil.org (or test with WSC-MEMBER-DEMO)"
+            default=""
+        />
+
+        <field
+            name="license_status"
+            type="text"
+            label="Credential Status"
+            readonly="true"
+            default="inactive"
+        />
+
+        <field
+            name="license_tier"
+            type="text"
+            label="Membership Tier"
+            readonly="true"
+            default="community"
+        />
+
+        <field
+            name="co_brand_name"
+            type="text"
+            label="Agency / Partner Display Name"
+            description="Optional co-branding name synced with your WSC Agency profile"
+            default=""
+        />
+
+        <field
+            name="co_brand_url"
+            type="url"
+            label="Agency Website URL"
+            default=""
+        />
+
+        <field
+            name="co_brand_email"
+            type="email"
+            label="Agency Support Email"
+            default=""
+        />
+
+        <field
+            name="co_brand_logo"
+            type="url"
+            label="Agency Logo URL"
+            default=""
+        />
+    </fieldset>
+
+    <fieldset name="ai_readiness" label="AI Readiness, Benchmarks &amp; IndexNow">
+        <field
+            name="industry_vertical"
+            type="list"
+            label="Industry Benchmark Vertical"
+            description="Taxonomy vertical used for WSC peer-group comparison"
+            default="/Computers &amp; Electronics">
+            <option value="/Computers &amp; Electronics">Computers &amp; Electronics / SaaS</option>
+            <option value="/Shopping/Apparel">E-Commerce &amp; Retail (/Shopping/Apparel)</option>
+            <option value="/Business &amp; Industrial">Business &amp; Industrial (B2B)</option>
+            <option value="/Finance">Finance &amp; Insurance</option>
+            <option value="/Health">Health &amp; Medical</option>
+            <option value="/News">News, Media &amp; Publishing</option>
+            <option value="/Travel &amp; Transportation">Travel &amp; Hospitality</option>
+            <option value="/Internet &amp; Telecom">Internet, Agency &amp; Telecom</option>
+        </field>
+
+        <field
+            name="llms_txt_enabled"
+            type="radio"
+            label="Enable Dynamic /llms.txt AI Manifest"
+            description="Expose machine-readable Markdown overview of published Joomla content at /llms.txt"
+            layout="joomla.form.field.radio.switcher"
+            default="1">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="indexnow_enabled"
+            type="radio"
+            label="Enable IndexNow Instant Push (Opt-In)"
+            description="Automatically notify IndexNow search engines when published Joomla articles are saved"
+            layout="joomla.form.field.radio.switcher"
+            default="0">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
+            name="indexnow_key"
+            type="text"
+            label="IndexNow Verification Key"
+            description="Automatically generated 32-character hexadecimal key served at /{key}.txt"
             readonly="true"
         />
     </fieldset>
