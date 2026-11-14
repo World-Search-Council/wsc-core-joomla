@@ -947,23 +947,23 @@ class WscCoreHelper {
             );
 
             $decoded = json_decode((string) $response->body, true);
-            if (is_array($decoded) && !empty($decoded['active'])) {
+            if (is_array($decoded) && (!empty($decoded['active']) || !empty($decoded['valid']))) {
                 $cb = $decoded['co_branding'] ?? [];
                 $updates = [
                     'license_key'        => $licenseKey,
                     'license_status'     => 'active',
                     'license_tier'       => (string) ($decoded['tier'] ?? 'member'),
                     'license_holder'     => (string) ($decoded['holder'] ?? $decoded['organization'] ?? 'WSC Member'),
-                    'license_demo'       => !empty($decoded['demo']) ? 1 : 0,
+                    'license_demo'       => (!empty($decoded['demo']) || !empty($decoded['is_demo'])) ? 1 : 0,
                     'license_agency'     => (!empty($decoded['agency']) || in_array(($decoded['tier'] ?? ''), ['agency', 'founding_partner'], true)) ? 1 : 0,
-                    'license_verify_url' => (string) ($decoded['verify_url'] ?? (self::PORTAL_BASE . '/verify?key=' . rawurlencode($licenseKey))),
+                    'license_verify_url' => (string) ($decoded['verify_url'] ?? (self::PORTAL_BASE . '/verify/' . rawurlencode($licenseKey))),
                     'license_expires_at' => (string) ($decoded['expires_at'] ?? ''),
                     'license_checked_at' => gmdate('Y-m-d H:i:s') . ' UTC',
                 ];
                 if (!empty($cb['agency_name']) || is_array($coBrandingUpdate)) {
                     $updates['co_brand_name']  = (string) ($cb['agency_name'] ?? $coBrandingUpdate['name'] ?? '');
                     $updates['co_brand_url']   = (string) ($cb['agency_url'] ?? $coBrandingUpdate['url'] ?? '');
-                    $updates['co_brand_email'] = (string) ($cb['agency_email'] ?? $coBrandingUpdate['email'] ?? '');
+                    $updates['co_brand_email'] = (string) ($cb['agency_email'] ?? $cb['support_email'] ?? $coBrandingUpdate['email'] ?? '');
                     $updates['co_brand_logo']  = (string) ($cb['agency_logo'] ?? $coBrandingUpdate['logo'] ?? '');
                 }
                 self::saveComponentParams($updates);
